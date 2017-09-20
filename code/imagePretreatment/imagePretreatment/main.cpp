@@ -7,27 +7,44 @@ using namespace std;
 void PiecewiseLinearGrayTransformation(Mat &src, Mat& dst, double maxGray, double minGray);
 void NoiseSmoothing(Mat &src, Mat &dst);
 
-int g_nMeanBlurValue = 3;
-Mat *NSsrcImage, *NSdstImage;
+
 int main()
 {
-	Mat srcImage = imread("1.jpg", CV_8UC1);
-	Mat resizeImage;
-	resize(srcImage, resizeImage, Size(),0.125,0.125);
-
-	/*
-	namedWindow("resizeImage", CV_WINDOW_AUTOSIZE); //创建原图像窗口  
-	imshow("resizeImage", resizeImage); //显示原图像  
-	*/
+	int i = 0;
+	for(;i<29;i++)
+	{ 
+	    string srcFileName = format("srcImage/%d.jpg", i);
+	    Mat srcImage = imread(srcFileName,CV_8U);
 	
-	Mat PLGImage(resizeImage.rows,resizeImage.cols, CV_8UC1);
-	Mat NSImage(resizeImage.rows, resizeImage.cols, CV_8UC1);
-
-	/*灰度线性变换*/
-	PiecewiseLinearGrayTransformation(resizeImage, PLGImage, 255, 0);
+	    Mat resizeImage;
+	    resize(srcImage, resizeImage, Size(),0.125,0.125);
 	
-	/*平滑去噪*/
-	NoiseSmoothing(PLGImage, NSImage);
+        
+	
+		Mat PLGImage;
+		PLGImage.create(resizeImage.size(), resizeImage.type());
+	    Mat NSImage;
+		NSImage.create(resizeImage.size(), resizeImage.type());
+
+	  /*灰度线性变换*/
+	    PiecewiseLinearGrayTransformation(resizeImage, PLGImage, 255, 0);
+	  
+     /*均值滤波*/
+		NoiseSmoothing(PLGImage, NSImage);
+
+     /*sobel边缘检测*/
+		Mat sobelDstImage;
+		sobelDstImage.create(resizeImage.size(), resizeImage.type());
+	//【4】求Y方向梯度  
+		Sobel(NSImage, sobelDstImage, CV_8U, 0, 1, 3, 1, 1, BORDER_DEFAULT);
+		convertScaleAbs(sobelDstImage, sobelDstImage);
+
+	/*保存预处理结果*/
+	   string dstFileName = format("tempImage/tempImage%d.jpg", i);
+	   imwrite(dstFileName, sobelDstImage);
+	 
+	  
+	}
 
 	cvWaitKey();
 	
@@ -54,38 +71,18 @@ void PiecewiseLinearGrayTransformation(Mat &src, Mat& dst, double maxGray, doubl
 				dst.at<uchar>(i,j) = k*((double)temp - minVal) + minGray;
 
 			if(temp < minVal || ((temp > maxVal) && (temp == maxVal)))
-				dst.at<uchar>(i, j) = temp;
+				dst.at<uchar>(i, j) = 255;
 				  
 		}
 	}
 
-	namedWindow("drcImage", CV_WINDOW_AUTOSIZE); //创建灰度变换图像窗口  
-	imshow("drcImage", dst); //显示灰度变换图像 
-
 }
 
-static void on_MeanBlur(int, void *);           //均值滤波回调函数 
 
 
 void NoiseSmoothing(Mat & src, Mat &dst)
 {
+	blur(src, dst, Size(3,3), Point(-1, -1));
 	
-	//创建窗口  
-	namedWindow("【<2>均值滤波】", CV_WINDOW_AUTOSIZE);
-	//创建轨迹条  
-	createTrackbar("内核值：", "【<2>均值滤波】", &g_nMeanBlurValue, 40, on_MeanBlur);
-	NSsrcImage = &src;
-	NSdstImage = &dst;
-	on_MeanBlur(g_nMeanBlurValue, 0);
 }
-void on_MeanBlur(int , void *)
-{
-	Mat src = *NSsrcImage;
-	Mat dst = *NSdstImage;
-	//均值滤波操作  
-	blur(src, dst, Size(g_nMeanBlurValue + 1, g_nMeanBlurValue + 1), Point(-1, -1));
-	//显示窗口  
-	imshow("【<2>均值滤波】", dst);
-	String tempImageName = "tempImage/NSImage.jpg";
-	imwrite(tempImageName, dst);
-}
+

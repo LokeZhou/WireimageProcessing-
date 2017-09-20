@@ -1,4 +1,4 @@
 ﻿  main.cpp
-d:\v.s.15\code\wireimageprocessing\code\imagepretreatment\imagepretreatment\main.cpp(54): warning C4244: “=”: 从“double”转换到“uchar”，可能丢失数据
+d:\v.s.15\code\wireimageprocessing\code\imagepretreatment\imagepretreatment\main.cpp(71): warning C4244: “=”: 从“double”转换到“uchar”，可能丢失数据
   imagePretreatment.vcxproj -> D:\V.S.15\code\WireimageProcessing\code\imagePretreatment\x64\Debug\imagePretreatment.exe
   imagePretreatment.vcxproj -> D:\V.S.15\code\WireimageProcessing\code\imagePretreatment\x64\Debug\imagePretreatment.pdb (Full PDB)
