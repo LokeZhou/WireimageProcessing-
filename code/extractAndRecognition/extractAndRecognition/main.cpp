@@ -7,26 +7,31 @@ using namespace std;
 void HoughTransform(Mat src, Mat& dst, int index);
 int main()
 {
+
+	
 	int i = 0;
-	for (; i < 1; i++)
+	for (; i < 29; i++)
 	{
 		//载入原始图片
-		string srcFileImage = format("tempImage/tempImage%d.jpg", i);
+		string srcFileImage = format("srcImage/%d.jpg", i);
 		Mat srcImage = imread(srcFileImage);
-	
-	//	cout << srcImage.type() << endl;
+		resize(srcImage, srcImage, Size(), 0.125, 0.125);
+		Mat midImage, dstImage;//临时变量和目标图的定义  
 		
-	    //霍夫变换
-		Mat houghDstImage;
-		houghDstImage = srcImage.clone();
-/*
-		Mat midImage;
-		midImage.create(srcImage.size(), srcImage.type());
-		threshold(srcImage, midImage, 96, 255, THRESH_BINARY);
-		*/
-		HoughTransform(srcImage, houghDstImage,i);
+		//【2】进行边缘检测和转化为灰度图  
+		Canny(srcImage, midImage, 100, 250, 3);//进行一此canny边缘检测  
+		cvtColor(midImage, dstImage, CV_GRAY2BGR);//转化边缘检测后的图为灰度图  
+		//保存边缘检测图
+		string templeImage = format("templeImage/templeImage%d.jpg", i);
+		imwrite(templeImage, dstImage);
+		
+	
+		HoughTransform(midImage, dstImage,i);
 
+		
 	}
+	
+
 	cvWaitKey();
 	return 0;
 }
@@ -53,7 +58,7 @@ void HoughTransform(Mat src, Mat & dst, int index)
 	
 	//进行霍夫P变换
 	vector<Vec4i> lines;//定义一个矢量结构lines用于存放得到的线段矢量集合  
-	HoughLinesP(src, lines, 1, CV_PI / 180, 80, 50, 10);
+	HoughLinesP(src, lines, 1, CV_PI / 180, 150, 50, 10);
 
 	//依次在图中绘制出每条线段  
 	for (size_t i = 0; i < lines.size(); i++)
@@ -63,6 +68,6 @@ void HoughTransform(Mat src, Mat & dst, int index)
 	}
 	
 	//保存图片
-	string templeImage = format("srcImage/templeImage%d.jpg", index);
+	string templeImage = format("dstImage/dstImage%d.jpg", index);
 	imwrite(templeImage,dst);
 }
